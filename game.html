@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔢 Sayı Treni - Ritmik Sayma Macerası</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Baloo+2:wght@400;600;800&display=swap');
+        
+        :root {
+            --primary-orange: #FF6B35;
+            --primary-purple: #7B68EE;
+            --primary-green: #2ECC71;
+            --primary-blue: #3498DB;
+            --primary-pink: #FF69B4;
+            --primary-yellow: #FFD700;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            --correct: #2ECC71;
+            --wrong: #E74C3C;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Clouds */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 100px;
+            opacity: 0.7;
+            animation: float 20s infinite;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 100px;
+        }
+
+        .cloud1 {
+            width: 100px;
+            height: 40px;
+            top: 10%;
+            left: -100px;
+            animation-duration: 25s;
+        }
+
+        .cloud1::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+
+        .cloud1::after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
+        }
+
+        .cloud2 {
+            width: 80px;
+            height: 35px;
+            top: 30%;
+            left: -80px;
+            animation-duration: 30s;
+            animation-delay: 5s;
+        }
+
+        .cloud2::before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 15px;
+        }
+
+        .cloud2::after {
+            width: 50px;
+            height: 35px;
+            top: -12px;
+            right: 15px;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(calc(100vw + 200px));
+            }
+        }
+
+        /* Floating Numbers Background */
+        .floating-number {
+            position: absolute;
+            font-size: 2rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.1);
+            animation: floatUp 15s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            to {
+                transform: translateY(-100vh) rotate(360deg);
+            }
+        }
+
+        /* Main Container */
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+            max-width: 1000px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .game-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-purple), var(--primary-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .train-animation {
+            font-size: 80px;
+            margin: 20px 0;
+            display: inline-block;
+            animation: chugChug 2s ease-in-out infinite;
+        }
+
+        @keyframes chugChug {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-2deg); }
+            75% { transform: translateX(10px) rotate(2deg); }
+        }
+
+        .welcome-description {
+            font-size: 1.3rem;
+            color: #555;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .difficulty-selection {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .diff-btn {
+            background: linear-gradient(135deg, var(--primary-green), #27AE60);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .diff-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        .diff-btn.selected {
+            background: linear-gradient(135deg, var(--primary-purple), #6C5CE7);
+            box-shadow: 0 5px 15px rgba(123, 104, 238, 0.4);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--primary-orange), #E74C3C);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.4);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-btn:hover::before {
+            left: 100%;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.5);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-pink));
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: exclude;
+            mask-composite: exclude;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+
+        /* Timer Bar */
+        .timer-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--primary-yellow));
+            border-radius: 10px;
+            transition: width 0.1s linear;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(100%); }
+        }
+
+        /* Train Display */
+        .train-container {
+            background: linear-gradient(135deg, #F0F0F0, #E0E0E0);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .train-track {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 20px 10px;
+            position: relative;
+        }
+
+        .train-track::before {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(90deg, #666 0px, #666 10px, transparent 10px, transparent 20px);
+        }
+
+        .train-engine {
+            font-size: 60px;
+            animation: engineBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes engineBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .train-car {
+            min-width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-blue), #2980B9);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
+            transform: scale(0);
+            animation: carAppear 0.5s forwards cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .train-car.empty {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 3px dashed #FF6B35;
+            color: #FF6B35;
+            font-size: 2.5rem;
+            animation: emptyPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes carAppear {
+            to {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+
+        @keyframes emptyPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        /* Question Section */
+        .question-section {
+            background: linear-gradient(135deg, rgba(123, 104, 238, 0.1), rgba(255, 105, 180, 0.1));
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .hint-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        /* Answer Options */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 3px solid var(--primary-purple);
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(123, 104, 238, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .answer-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(123, 104, 238, 0.3);
+        }
+
+        .answer-btn.correct {
+            background: var(--correct);
+            color: white;
+            border-color: var(--correct);
+            animation: correctAnswer 0.6s;
+        }
+
+        .answer-btn.wrong {
+            background: var(--wrong);
+            color: white;
+            border-color: var(--wrong);
+            animation: wrongAnswer 0.6s;
+        }
+
+        @keyframes correctAnswer {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+        }
+
+        @keyframes wrongAnswer {
+            0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        }
+
+        /* Helper Button */
+        .helper-btn {
+            background: linear-gradient(135deg, var(--primary-yellow), #FFA500);
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 15px auto;
+            display: block;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .helper-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Result Screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+            animation: resultSlide 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes resultSlide {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .result-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 3rem;
+            color: var(--primary-purple);
+            margin-bottom: 20px;
+        }
+
+        .trophy {
+            font-size: 100px;
+            animation: trophyBounce 1s ease-in-out infinite;
+        }
+
+        @keyframes trophyBounce {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .stars-container {
+            margin: 20px 0;
+        }
+
+        .star {
+            display: inline-block;
+            font-size: 60px;
+            margin: 0 5px;
+            animation: starRotate 2s linear infinite;
+        }
+
+        @keyframes starRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-stats {
+            background: linear-gradient(135deg, rgba(123, 104, 238, 0.1), rgba(255, 105, 180, 0.1));
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .result-stat {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .result-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, var(--primary-green), #27AE60);
+            color: white;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, var(--primary-orange), #E74C3C);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .menu-btn {
+            background: linear-gradient(135deg, var(--primary-purple), #6C5CE7);
+            color: white;
+            box-shadow: 0 5px 15px rgba(123, 104, 238, 0.3);
+        }
+
+        .result-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Particle Effects */
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary-pink);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFall 3s linear;
+        }
+
+        @keyframes particleFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem;
+            }
+            
+            .train-car {
+                min-width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .train-engine {
+                font-size: 40px;
+            }
+            
+            .answer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .question-text {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Sound indicator */
+        .sound-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            background: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sound-indicator:hover {
+            transform: scale(1.1);
+        }
+
+        /* Progress Indicator */
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .progress-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(123, 104, 238, 0.2);
+            transition: all 0.3s;
+        }
+
+        .progress-dot.active {
+            background: var(--primary-purple);
+            transform: scale(1.3);
+        }
+
+        .progress-dot.completed {
+            background: var(--correct);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div id="floatingNumbers"></div>
+
+    <!-- Sound Toggle -->
+    <div class="sound-indicator" onclick="toggleSound()" id="soundToggle">🔊</div>
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <!-- Welcome Screen -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1 class="game-title">🔢 Sayı Treni 🚂</h1>
+            <div class="train-animation">🚂</div>
+            <p class="welcome-description">
+                Ritmik saymayı öğrenelim! Sayı trenimizi tamamlayalım!
+            </p>
+            
+            <div style="margin-bottom: 20px;">
+                <p style="font-size: 1.1rem; color: #666; margin-bottom: 10px;">Zorluk Seviyesi Seç:</p>
+                <div class="difficulty-selection">
+                    <button class="diff-btn selected" onclick="selectDifficulty('easy')">
+                        🌟 Kolay (2'şer, 5'er)
+                    </button>
+                    <button class="diff-btn" onclick="selectDifficulty('medium')">
+                        ⭐⭐ Orta (3'er, 4'er, 10'ar)
+                    </button>
+                    <button class="diff-btn" onclick="selectDifficulty('hard')">
+                        💫💫💫 Zor (6'şar, 7'şer, 8'er, 9'ar)
+                    </button>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">
+                🎮 BAŞLA
+            </button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Seviye</div>
+                        <div class="stat-value" id="levelDisplay">1</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Süre</div>
+                        <div class="timer-bar">
+                            <div class="timer-fill" id="timerFill"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Puan</div>
+                        <div class="stat-value" id="scoreDisplay">0</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Doğru</div>
+                        <div class="stat-value"><span id="correctDisplay">0</span>/8</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="progress-dots" id="progressDots">
+                <div class="progress-dot active"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+                <div class="progress-dot"></div>
+            </div>
+
+            <!-- Train Display -->
+            <div class="train-container">
+                <div class="train-track" id="trainTrack">
+                    <div class="train-engine">🚂</div>
+                    <!-- Train cars will be generated here -->
+                </div>
+            </div>
+
+            <!-- Question Section -->
+            <div class="question-section">
+                <div class="question-text" id="questionText">
+                    Trende hangi sayı olmalı?
+                </div>
+                <div class="hint-text" id="hintText">
+                    <!-- Hint will appear here -->
+                </div>
+                
+                <!-- Answer Options -->
+                <div class="answer-grid" id="answerGrid">
+                    <!-- Answer buttons will be generated here -->
+                </div>
+                
+                <button class="helper-btn" onclick="showHint()">
+                    💡 İpucu
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="resultScreen">
+            <h2 class="result-title" id="resultTitle">Tebrikler!</h2>
+            <div class="trophy" id="trophy">🏆</div>
+            
+            <div class="stars-container" id="starsContainer">
+                <!-- Stars will be generated here -->
+            </div>
+            
+            <div class="result-stats">
+                <div class="result-stat">📊 Seviye: <span id="finalLevel">1</span></div>
+                <div class="result-stat">⭐ Toplam Puan: <span id="finalScore">0</span></div>
+                <div class="result-stat">🎯 Doğru Sayısı: <span id="finalCorrect">0</span>/8</div>
+                <div class="result-stat">⏱️ Geçen Süre: <span id="finalTime">0</span> saniye</div>
+            </div>
+            
+            <div class="result-buttons">
+                <button class="result-btn next-btn" onclick="nextLevel()" id="nextBtn">
+                    ➡️ Sonraki Seviye
+                </button>
+                <button class="result-btn retry-btn" onclick="retryLevel()">
+                    🔄 Tekrar Dene
+                </button>
+                <button class="result-btn menu-btn" onclick="backToMenu()">
+                    🏠 Ana Menü
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game Variables
+        let currentLevel = 1;
+        let score = 0;
+        let timeLeft = 30;
+        let timerInterval;
+        let currentPattern = [];
+        let currentStep = 2;
+        let correctAnswer = 0;
+        let questionsInLevel = 8;
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let difficulty = 'easy';
+        let soundEnabled = true;
+        let startTime;
+        let totalTime = 0;
+        let hintUsed = false;
+        let isBackwardCounting = false;
+        
+        // Audio Context for sounds
+        let audioContext;
+
+        // Level Patterns based on difficulty
+        const difficultyPatterns = {
+            easy: [2, 5, 2, 5, 10],
+            medium: [3, 4, 10, 3, 4],
+            hard: [6, 7, 8, 9, 6]
+        };
+
+        // Level Configuration
+        const levels = [
+            { timeLimit: 45, range: [0, 50], trainLength: 4 },
+            { timeLimit: 42, range: [0, 80], trainLength: 5 },
+            { timeLimit: 40, range: [0, 100], trainLength: 5 },
+            { timeLimit: 38, range: [10, 120], trainLength: 6 },
+            { timeLimit: 35, range: [20, 150], trainLength: 6 },
+            { timeLimit: 32, range: [30, 200], trainLength: 7 },
+            { timeLimit: 30, range: [50, 250], trainLength: 7 },
+            { timeLimit: 28, range: [100, 300], trainLength: 8 },
+            { timeLimit: 25, range: [150, 400], trainLength: 8 },
+            { timeLimit: 22, range: [200, 500], trainLength: 9 }
+        ];
+
+        // Initialize Audio
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play Sound
+        function playSound(frequency, duration, type = 'sine') {
+            if (!soundEnabled) return;
+            initAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // Success Sound
+        function playSuccessSound() {
+            playSound(523.25, 0.1); // C5
+            setTimeout(() => playSound(659.25, 0.1), 100); // E5
+            setTimeout(() => playSound(783.99, 0.2), 200); // G5
+        }
+
+        // Error Sound
+        function playErrorSound() {
+            playSound(220, 0.2); // A3
+            setTimeout(() => playSound(196, 0.3), 200); // G3
+        }
+
+        // Click Sound
+        function playClickSound() {
+            playSound(440, 0.05); // A4
+        }
+
+        // Toggle Sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+            playClickSound();
+        }
+
+        // Select Difficulty
+        function selectDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            playClickSound();
+        }
+
+        // Create Floating Numbers
+        function createFloatingNumbers() {
+            const container = document.getElementById('floatingNumbers');
+            for (let i = 0; i < 15; i++) {
+                const number = document.createElement('div');
+                number.className = 'floating-number';
+                number.textContent = Math.floor(Math.random() * 100);
+                number.style.left = Math.random() * 100 + '%';
+                number.style.animationDelay = Math.random() * 15 + 's';
+                number.style.fontSize = (Math.random() * 2 + 1) + 'rem';
+                container.appendChild(number);
+            }
+        }
+
+        // Start Game
+        function startGame() {
+            playClickSound();
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('resultScreen').style.display = 'none';
+            
+            currentLevel = 1;
+            score = 0;
+            startTime = Date.now();
+            
+            startLevel();
+        }
+
+        // Start Level
+        function startLevel() {
+            const levelConfig = levels[Math.min(currentLevel - 1, levels.length - 1)];
+            timeLeft = levelConfig.timeLimit;
+            currentQuestion = 0;
+            correctAnswers = 0;
+            
+            document.getElementById('levelDisplay').textContent = currentLevel;
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('correctDisplay').textContent = '0';
+            
+            resetProgressDots();
+            loadQuestion();
+            startTimer();
+        }
+
+        // Reset Progress Dots
+        function resetProgressDots() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index === 0) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        // Update Progress Dots
+        function updateProgressDots() {
+            const dots = document.querySelectorAll('.progress-dot');
+            if (currentQuestion > 0 && currentQuestion <= dots.length) {
+                dots[currentQuestion - 1].classList.remove('active');
+                dots[currentQuestion - 1].classList.add('completed');
+            }
+            if (currentQuestion < dots.length) {
+                dots[currentQuestion].classList.add('active');
+            }
+        }
+
+        // Load Question
+        function loadQuestion() {
+            hintUsed = false;
+            const levelConfig = levels[Math.min(currentLevel - 1, levels.length - 1)];
+            const patterns = difficultyPatterns[difficulty];
+            currentStep = patterns[currentQuestion % patterns.length];
+            
+            // Decide if this question should be backward counting (30% chance after level 2)
+            isBackwardCounting = currentLevel > 2 && Math.random() < 0.3;
+            
+            // Generate pattern starting number
+            let startNum;
+            if (isBackwardCounting) {
+                // For backward counting, start with a higher number
+                startNum = Math.floor(Math.random() * 20 + 20) * currentStep;
+            } else {
+                // For forward counting
+                startNum = Math.floor(Math.random() * 10) * currentStep;
+            }
+            
+            currentPattern = [];
+            
+            // Create train pattern
+            for (let i = 0; i < levelConfig.trainLength; i++) {
+                if (isBackwardCounting) {
+                    currentPattern.push(startNum - (i * currentStep));
+                } else {
+                    currentPattern.push(startNum + (i * currentStep));
+                }
+            }
+            
+            // Hide one number randomly (not first or last for easier gameplay)
+            const hiddenIndex = Math.floor(Math.random() * (currentPattern.length - 2)) + 1;
+            correctAnswer = currentPattern[hiddenIndex];
+            
+            displayTrain(hiddenIndex);
+            generateAnswers();
+            updateQuestionText();
+        }
+
+        // Display Train
+        function displayTrain(hiddenIndex) {
+            const container = document.getElementById('trainTrack');
+            container.innerHTML = '<div class="train-engine">🚂</div>';
+            
+            // Add direction indicator
+            if (isBackwardCounting) {
+                const arrow = document.createElement('div');
+                arrow.style.fontSize = '40px';
+                arrow.style.color = '#E74C3C';
+                arrow.style.animation = 'bounce 1s infinite';
+                arrow.textContent = '⬅️';
+                container.appendChild(arrow);
+            }
+            
+            currentPattern.forEach((num, index) => {
+                setTimeout(() => {
+                    const car = document.createElement('div');
+                    car.className = 'train-car';
+                    
+                    if (index === hiddenIndex) {
+                        car.classList.add('empty');
+                        car.textContent = '?';
+                    } else {
+                        car.textContent = num;
+                        // Different color for backward counting
+                        if (isBackwardCounting) {
+                            car.style.background = 'linear-gradient(135deg, #E74C3C, #C0392B)';
+                        }
+                    }
+                    
+                    car.style.animationDelay = `${index * 0.1}s`;
+                    container.appendChild(car);
+                    
+                    if (index === hiddenIndex) {
+                        car.addEventListener('animationend', () => {
+                            car.style.animation = 'emptyPulse 1s ease-in-out infinite';
+                        });
+                    }
+                }, index * 100);
+            });
+            
+            // Add direction indicator at the end
+            if (!isBackwardCounting) {
+                setTimeout(() => {
+                    const arrow = document.createElement('div');
+                    arrow.style.fontSize = '40px';
+                    arrow.style.color = '#2ECC71';
+                    arrow.style.animation = 'bounce 1s infinite';
+                    arrow.textContent = '➡️';
+                    container.appendChild(arrow);
+                }, currentPattern.length * 100);
+            }
+        }
+
+        // Update Question Text
+        function updateQuestionText() {
+            const questionText = document.getElementById('questionText');
+            const hintText = document.getElementById('hintText');
+            
+            const stepNames = {
+                2: "2'şer 2'şer",
+                3: "3'er 3'er",
+                4: "4'er 4'er",
+                5: "5'er 5'er",
+                6: "6'şar 6'şar",
+                7: "7'şer 7'şer",
+                8: "8'er 8'er",
+                9: "9'ar 9'ar",
+                10: "10'ar 10'ar"
+            };
+            
+            if (isBackwardCounting) {
+                questionText.innerHTML = `<span style="color: #E74C3C;">⬅️ GERİYE DOĞRU</span> ${stepNames[currentStep]} sayıyoruz. Boş vagonda hangi sayı olmalı?`;
+            } else {
+                questionText.innerHTML = `<span style="color: #2ECC71;">➡️ İLERİYE DOĞRU</span> ${stepNames[currentStep]} sayıyoruz. Boş vagonda hangi sayı olmalı?`;
+            }
+            hintText.textContent = '';
+        }
+
+        // Generate Answers
+        function generateAnswers() {
+            const container = document.getElementById('answerGrid');
+            container.innerHTML = '';
+            
+            const answers = new Set([correctAnswer]);
+            
+            // Generate plausible wrong answers
+            while (answers.size < 4) {
+                const offset = (Math.floor(Math.random() * 3) + 1) * currentStep;
+                const wrongAnswer = correctAnswer + (Math.random() > 0.5 ? offset : -offset);
+                
+                if (wrongAnswer >= 0 && wrongAnswer <= 500) {
+                    answers.add(wrongAnswer);
+                }
+            }
+            
+            // Convert to array and shuffle
+            const answersArray = Array.from(answers).sort(() => Math.random() - 0.5);
+            
+            answersArray.forEach((answer, index) => {
+                setTimeout(() => {
+                    const btn = document.createElement('button');
+                    btn.className = 'answer-btn';
+                    btn.textContent = answer;
+                    btn.onclick = () => checkAnswer(answer, btn);
+                    container.appendChild(btn);
+                }, index * 50);
+            });
+        }
+
+        // Check Answer
+        function checkAnswer(answer, button) {
+            if (button.disabled) return;
+            
+            // Disable all buttons
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            if (answer === correctAnswer) {
+                button.classList.add('correct');
+                correctAnswers++;
+                
+                // Update score based on hint usage
+                const points = hintUsed ? 5 : 10;
+                score += points * currentLevel;
+                
+                document.getElementById('scoreDisplay').textContent = score;
+                document.getElementById('correctDisplay').textContent = correctAnswers;
+                
+                playSuccessSound();
+                createParticles(button);
+                
+                // Update train car to show correct answer
+                const emptyCar = document.querySelector('.train-car.empty');
+                if (emptyCar) {
+                    emptyCar.classList.remove('empty');
+                    emptyCar.textContent = correctAnswer;
+                    emptyCar.style.background = 'linear-gradient(135deg, #2ECC71, #27AE60)';
+                }
+            } else {
+                button.classList.add('wrong');
+                playErrorSound();
+                
+                // Show correct answer
+                document.querySelectorAll('.answer-btn').forEach(btn => {
+                    if (parseInt(btn.textContent) === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+            
+            currentQuestion++;
+            updateProgressDots();
+            
+            setTimeout(() => {
+                if (currentQuestion >= questionsInLevel) {
+                    endLevel();
+                } else {
+                    loadQuestion();
+                }
+            }, 2000);
+        }
+
+        // Show Hint
+        function showHint() {
+            if (hintUsed) return;
+            
+            hintUsed = true;
+            playClickSound();
+            
+            const hintText = document.getElementById('hintText');
+            const index = currentPattern.indexOf(correctAnswer);
+            const prevNum = currentPattern[index - 1];
+            const nextNum = currentPattern[index + 1];
+            
+            if (isBackwardCounting) {
+                if (prevNum !== undefined) {
+                    hintText.textContent = `💡 ${prevNum}'dan ${currentStep} çıkarırsan...`;
+                } else if (nextNum !== undefined) {
+                    hintText.textContent = `💡 ${nextNum}'a ${currentStep} eklersen...`;
+                }
+            } else {
+                if (prevNum !== undefined) {
+                    hintText.textContent = `💡 ${prevNum}'a ${currentStep} eklersen...`;
+                } else if (nextNum !== undefined) {
+                    hintText.textContent = `💡 ${nextNum}'dan ${currentStep} çıkarırsan...`;
+                }
+            }
+        }
+
+        // Timer Functions
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endLevel();
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const levelConfig = levels[Math.min(currentLevel - 1, levels.length - 1)];
+            const percentage = (timeLeft / levelConfig.timeLimit) * 100;
+            document.getElementById('timerFill').style.width = percentage + '%';
+            
+            // Change color based on time
+            if (percentage > 50) {
+                document.getElementById('timerFill').style.background = 'linear-gradient(90deg, #2ECC71, #27AE60)';
+            } else if (percentage > 20) {
+                document.getElementById('timerFill').style.background = 'linear-gradient(90deg, #FFD700, #FFA500)';
+            } else {
+                document.getElementById('timerFill').style.background = 'linear-gradient(90deg, #E74C3C, #C0392B)';
+            }
+        }
+
+        // End Level
+        function endLevel() {
+            clearInterval(timerInterval);
+            totalTime = Math.floor((Date.now() - startTime) / 1000);
+            
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            
+            showResults();
+        }
+
+        // Show Results
+        function showResults() {
+            const percentage = (correctAnswers / questionsInLevel) * 100;
+            let stars = 0;
+            let title = '';
+            let trophy = '🏆';
+            
+            if (percentage === 100) {
+                stars = 3;
+                title = 'Mükemmel! Tam puan!';
+                trophy = '🏆';
+            } else if (percentage >= 80) {
+                stars = 3;
+                title = 'Harika İş!';
+                trophy = '🥇';
+            } else if (percentage >= 60) {
+                stars = 2;
+                title = 'Çok İyi!';
+                trophy = '🥈';
+            } else if (percentage >= 40) {
+                stars = 1;
+                title = 'İyi Başlangıç!';
+                trophy = '🥉';
+            } else {
+                stars = 0;
+                title = 'Tekrar Deneyelim!';
+                trophy = '💪';
+            }
+            
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('trophy').textContent = trophy;
+            document.getElementById('finalLevel').textContent = currentLevel;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalCorrect').textContent = correctAnswers;
+            document.getElementById('finalTime').textContent = totalTime;
+            
+            // Display stars
+            const starsContainer = document.getElementById('starsContainer');
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('span');
+                    star.className = 'star';
+                    star.textContent = i < stars ? '⭐' : '☆';
+                    starsContainer.appendChild(star);
+                    
+                    if (i < stars) {
+                        playSound(440 + (i * 100), 0.1);
+                    }
+                }, i * 200);
+            }
+            
+            // Show/hide next button
+            if (stars > 0 && currentLevel < 10) {
+                document.getElementById('nextBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'none';
+            }
+        }
+
+        // Next Level
+        function nextLevel() {
+            playClickSound();
+            currentLevel++;
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            startLevel();
+        }
+
+        // Retry Level
+        function retryLevel() {
+            playClickSound();
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            startLevel();
+        }
+
+        // Back to Menu
+        function backToMenu() {
+            playClickSound();
+            clearInterval(timerInterval);
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'block';
+        }
+
+        // Create Particle Effects
+        function createParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const colors = ['#FF6B35', '#7B68EE', '#2ECC71', '#3498DB', '#FFD700'];
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = (rect.left + rect.width / 2) + 'px';
+                    particle.style.top = (rect.top + rect.height / 2) + 'px';
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.animation = `particleFall ${Math.random() * 2 + 1}s linear`;
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            createFloatingNumbers();
+            initAudio();
+        };
+    </script>
+</body>
+</html>

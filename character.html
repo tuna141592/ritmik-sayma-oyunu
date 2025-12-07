@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karakter Seçimi</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .character-selection {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .character-options {
+            display: flex;
+        }
+        .character-box {
+            border: 2px solid #ccc;
+            padding: 20px;
+            margin: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .character-box:hover {
+            background-color: #f0f0f0;
+        }
+        .character-box.selected {
+            border-color: #ff6f61;
+            background-color: #ffecd2;
+        }
+        #start-game-button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="character-selection">
+        <div class="character-options">
+            <div class="character-box" onclick="selectCharacter('robot', this)">
+                <img src="audio/robot.png" alt="Robot" width="100">
+                <p>Robot</p>
+            </div>
+            <div class="character-box" onclick="selectCharacter('kedi', this)">
+                <img src="audio/kedi.png" alt="Kedi" width="100">
+                <p>Kedi</p>
+            </div>
+            <div class="character-box" onclick="selectCharacter('uzayli', this)">
+                <img src="audio/uzayli.png" alt="Uzaylı" width="100">
+                <p>Uzaylı</p>
+            </div>
+        </div>
+        <button id="start-game-button" onclick="startGame()">Oyuna Başla</button>
+    </div>
+    <script>
+        const startButton = document.getElementById('start-game-button');
+        let selectedCharacter = null;
+
+        function selectCharacter(character, element) {
+            localStorage.setItem('selectedCharacter', character);
+            selectedCharacter = character;
+            const characterBoxes = document.querySelectorAll('.character-box');
+            characterBoxes.forEach(box => box.classList.remove('selected'));
+            element.classList.add('selected');
+            startButton.style.display = 'block';
+        }
+
+        function startGame() {
+            if (selectedCharacter) {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
